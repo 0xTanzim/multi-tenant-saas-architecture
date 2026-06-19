@@ -1,6 +1,6 @@
 # Deployment, Operations & Infrastructure
 
-Docker, Kubernetes, AWS deployment, monitoring, backup, and disaster recovery.
+Docker, Docker, AWS deployment, monitoring, backup, and disaster recovery.
 
 ## Files
 
@@ -24,7 +24,6 @@ Docker containerization guide.
 
 ### 3. **KUBERNETES_SCALING.md**
 
-Kubernetes orchestration guide.
 
 - Deployment configurations
 - Service definitions
@@ -70,7 +69,7 @@ AWS-specific deployment.
 ## Infrastructure Stack
 
 - **Containerization**: Docker
-- **Orchestration**: Kubernetes
+- **Orchestration**: Docker Compose
 - **Cloud**: AWS (or self-hosted)
 - **Monitoring**: Prometheus + Grafana
 - **Logging**: ELK Stack
@@ -91,7 +90,7 @@ Code Commit → Build Docker Image
 
 1. **First deployment?** Read DEPLOYMENT_PROCEDURES.md
 2. **Using Docker?** Read DOCKER_REFERENCE.md
-3. **Using Kubernetes?** Read KUBERNETES_SCALING.md
+3. **Scaling?** Read SCALING_STRATEGY.md
 4. **Mobile app?** Read MOBILE_DEVELOPMENT_GUIDE.md
 5. **Monitoring?** Read MONITORING_OBSERVABILITY.md
 

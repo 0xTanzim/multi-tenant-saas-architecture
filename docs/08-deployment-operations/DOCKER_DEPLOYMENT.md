@@ -301,7 +301,7 @@ SECRETS=$(aws secretsmanager get-secret-value \
   --query SecretString --output text)
 ```
 
-**Option 2: Kubernetes Secrets**
+**Option 2: Cloud Secret Manager**
 
 ```bash
 kubectl create secret generic donebyme-secrets \
@@ -607,7 +607,7 @@ NODE_OPTIONS="--max-old-space-size=1024 --gc-interval=1000"
 | **Build Strategy**   | Multi-stage Docker builds for size/security                |
 | **Configuration**    | Environment variables validated on startup                 |
 | **Secrets**          | AWS Secrets Manager or encrypted .env                      |
-| **Deployment**       | Docker Compose local, managed orchestration (ECS/K8s) prod |
+| **Deployment**       | Docker Compose local, managed orchestration (ECS) prod |
 | **Health Checks**    | HTTP endpoints, container healthchecks configured          |
 | **Logging**          | Structured logs with tenant_id context                     |
 | **Resources**        | Memory limits enforced, monitoring enabled                 |

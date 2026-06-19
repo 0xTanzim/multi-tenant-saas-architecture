@@ -488,7 +488,7 @@ Isolation applies to:
 - Database queries
 - Cache keys (prefix with `tenant:{id}:`)
 - Background jobs
-- WebSocket events
+- WebSocket events (future)
 - Test fixtures and seed data
 
 ### Cross-Tenant Prevention

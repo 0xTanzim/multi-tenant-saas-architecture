@@ -77,7 +77,7 @@ Test Framework       ← Jest / Vitest / Playwright
     │
 Registry             ← Docker Hub / ECR / Artifact Registry
     │
-Deployment           ← Kubernetes / Docker Compose / CloudRun
+Deployment           ← Docker Compose / CloudRun
     │
 Monitoring           ← Prometheus / DataDog / CloudWatch
 ```

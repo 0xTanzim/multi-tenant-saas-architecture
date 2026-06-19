@@ -46,7 +46,7 @@ The platform fee system in the Platform has a **critical architectural split**: 
 | **Where it's configured** | `platform_configurations` table | `PLATFORM_FEE_PERCENTAGE` env var |
 | **Who reads it** | `BookingValidationService` | `PaymentService` |
 | **Default value** | `0.00` (0%) | `0.05` (5%) |
-| **What it controls** | Pricing preview shown in UI | Actual Stripe `application_fee_amount` |
+| **What it controls** | Pricing preview shown in UI | Stripe PaymentIntent metadata for reconciliation |
 | **Admin can edit?** | ✅ Yes, via Settings UI | ❌ No, requires server restart |
 
 These two worlds produce **different fee amounts** for the same booking. The admin configures fees via the beautiful settings UI, but Stripe charges a completely different fee that comes from an environment variable.
@@ -101,7 +101,7 @@ Customer creates a booking for $100 service
             │  │                              │
             │  │ INSERT INTO bookings (       │
             │  │   service_price,             │
-            │  │   total_amount,              │
+            │  │  total_amount,  ← 110.00 (excludes platform fee)              │
             │  │   tax_amount,               │
             │  │   discount_amount,           │
             │  │   ...                        │
@@ -157,7 +157,7 @@ Customer proceeds to pay for the same $100 booking
      │  └─ platformFee = Math.round(amount × 0.05) = $5.00
      │
      ├─ Stripe:
-     │  └─ application_fee_amount: 500 (cents)  ← $5.00 charged!
+     │  └─ DB platform_fee recorded: 500 cents  ← Tracked in booking_payments table
      │
      └─ Writes to booking_payments:
         └─ platform_fee: 5.00  ← $5.00 recorded
@@ -272,7 +272,7 @@ pricing: {
   basePrice: booking.total_amount - booking.tax_amount + booking.discount_amount,
   discountAmount: booking.discount_amount,
   taxAmount: booking.tax_amount,
-  totalAmount: booking.total_amount,
+  totalAmount: booking.total_amount,  ← 110.00 (excludes platform fee)
   currency: booking.currency,
   depositAmount: booking.deposit_amount,
   depositRequired: booking.deposit_amount > 0,
@@ -398,7 +398,7 @@ How fees are stored:
 1. Fee percentages are **stored on each reservation** — snapshotted at booking time
 2. Fee rates are per-listing-type, per-market — NOT global
 3. Both fees are **visible** to the paying party (guest sees their fee; host sees theirs)
-4. Stripe receives **one combined `application_fee_amount`** = sum of both fees
+4. Fee is recorded in `booking_payments` table with `platform_fee` column for each booking
 5. Fee modification after booking is a **separate refund/adjustment flow**
 
 ### Fresha — The Payment Processing Fee Model
@@ -521,7 +521,7 @@ graph TB
 
     subgraph "5. Payment Processing"
         BookingDB -->|reads fee from booking| PaySvc[PaymentService]
-        PaySvc -->|application_fee_amount = 300| Stripe[Stripe]
+        PaySvc -->|payment_intent.create with metadata| Stripe[Stripe]
         PaySvc -->|writes| BPT[(booking_payments<br/>platform_fee = 3.00)]
     end
 
@@ -612,7 +612,7 @@ Platform receives:  $3.30
 
 Stripe:
   total_charge = $110.00
-  application_fee_amount = $3.30 (330 cents)
+  platform_fee (DB) = $3.30 (330 cents)
   auto-transferred to platform's Stripe account
 ```
 
@@ -688,7 +688,7 @@ booking-persistence.service.ts
        tax_amount,              ← 10.00
        platform_fee_amount,     ← 3.00   ← NEW COLUMN
        platform_fee_percentage, ← 0.03   ← NEW COLUMN
-       total_amount,            ← 113.00
+      total_amount,  ← 110.00 (excludes platform fee)            ← 113.00
        deposit_amount,          ← 0.00
        currency,                ← 'DKK'
        ...
@@ -727,7 +727,7 @@ PaymentService.createPaymentIntent()
   │    amount: 11300,                      ← 113.00 in cents
   │    currency: 'dkk',
   │    application_fee_amount: 300,        ← 3.00 in cents (FROM BOOKING!)
-  │    transfer_data: { destination: salon_stripe_account }
+  │    // No transfer_data — single platform Stripe account
   │  })
   │
   └─ INSERT INTO booking_payments (
@@ -1166,7 +1166,7 @@ All existing booking tests will continue passing because they use `platformFeeAm
 | 5 | Admin changes fee % between booking creation and payment | Booking uses snapshotted rate. Payment reads from booking. No discrepancy. | LOW |
 | 6 | Booking created, fee snapshotted, then full refund | Refund should include the platform fee. Platform gives back its cut. | MEDIUM |
 | 7 | Partial payment on a booking | Fee proportional to actual amount charged. Not full fee on partial amount. | HIGH |
-| 8 | Cash payment (no Stripe) | Fee still recorded for accounting, but no Stripe `application_fee_amount`. Platform invoices organization/business separately. | MEDIUM |
+| 8 | Cash payment (no Stripe) | Fee still recorded for accounting in `booking_payments` table for settlement reporting. | MEDIUM |
 | 9 | Multi-service booking ($50 + $30 + $20 = $100) | Fee on $100 total, not calculated per-service | LOW |
 | 10 | Discount applied ($100 - $20 discount = $80) | Fee on $80 (post-discount). Fee base = taxable amount. | MEDIUM |
 | 11 | Loyalty points reduce price ($80 - $10 loyalty = $70) | Fee on $70 (post-loyalty). Loyalty reduces fee base. | MEDIUM |
@@ -1184,7 +1184,7 @@ All existing booking tests will continue passing because they use `platformFeeAm
 | 3 | **Fee manipulation via API** | Only Platform Admin role can modify `platform_configurations`. Regular tenants have read-only access. |
 | 4 | **Excessive fee (DoS via config)** | Add validation: fee % must be 0-30%. Reject values outside range. |
 | 5 | **Historical fee modification** | Fee snapshotted on booking record is immutable. Admin config change only affects future bookings. |
-| 6 | **Stripe webhook fee verification** | On `payment_intent.succeeded` webhook, compare Stripe's `application_fee_amount` with booking's `platform_fee_amount`. Flag discrepancies. |
+| 6 | **Stripe webhook fee verification** | On `payment_intent.succeeded` webhook, match Stripe metadata against booking's `platform_fee_amount`. Flag discrepancies. |
 | 7 | **Audit logging** | All config changes must be logged with admin user ID, timestamp, old value, new value. |
 
 ---
@@ -1351,7 +1351,7 @@ Score:     9.5 / 10 (up from 8.2)                                     ✅
 
 1. Admin frontend UI for per-tenant fee management (search organization/business → set override)
 2. Public platform config React Query hook
-3. Stripe Connect `application_fee_amount` integration (if marketplace payouts needed)
+3. Automated tenant payouts (currently manual settlement via DB reporting)
 4. Fee reconciliation reporting (compare `bookings.platform_fee_amount` vs `booking_payments.platform_fee`)
 
 ---

@@ -1,6 +1,9 @@
 # RFC: Enterprise Notification System — Comprehensive Design
 
-**Status**: Architecture Reference
+> **Status: Draft — Not Yet Implemented**
+> This document describes a **proposed future architecture** that extends the current MVP notification system. BullMQ job queues, delivery logging, and real-time SSE are aspirational targets. The current system uses in-process event dispatch via `@nestjs/event-emitter` and client-side polling.
+
+**Status**: Architecture Reference (Proposed)
 **Author**: Product & Engineering
 **Created**: 2025-09-20
 **Scope**: Full-scale multi-channel notification infrastructure for 50+ notification types

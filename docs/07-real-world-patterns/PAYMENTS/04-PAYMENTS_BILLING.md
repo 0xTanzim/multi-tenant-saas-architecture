@@ -364,23 +364,11 @@ async function processCustomerPayment(
       {
         amount: amountCents,
         currency: 'usd',
-
-        // Application fee (platform's cut)
-        application_fee_amount: platformFeeCents,
-
-        // Destination (Stripe Connect)
-        transfer_data: {
-          destination: tenant.stripe_account_id,
-          amount: tenantReceivesCents,
-        },
-
         metadata: {
           tenant_id: tenantId,
-          customer_id: customerId,
+          booking_id: bookingId,
+          platform_fee_cents: String(platformFeeCents)
         },
-      },
-      {
-        stripeAccount: tenant.stripe_account_id, // Route via Stripe Connect
       }
     );
 

@@ -26,7 +26,7 @@ This repo is proof-of-work: it shows how I think about systems, how I document d
 |---------|-----------------|
 | **Multi-Tenant Architecture** | Shared PostgreSQL schema with row-level security, composite indexes, tenant-scoped queries via Drizzle ORM |
 | **Booking System** | Real-time availability, interval validation, conflict detection, lifecycle states (pending → confirmed → completed) |
-| **Payments** | Stripe integration, platform fee split, connect accounts, webhook event handling |
+| **Payments** | Stripe Platform Model (single account), platform fee split, idempotent webhook handling |
 | **RBAC** | Hierarchical role-based access control (Owner → Manager → Staff → Customer), tenant-scoped permissions |
 | **Loyalty Program** | Points accumulation, redemption rules, fund management, expiry logic |
 | **Search & Discovery** | Full-text PostgreSQL search, geolocation via PostGIS, filtering and ranking |

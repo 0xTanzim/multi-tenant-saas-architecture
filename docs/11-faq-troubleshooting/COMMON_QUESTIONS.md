@@ -258,7 +258,7 @@ const tenantId = tokenPayload.tenant_id;
 **Deployment flow:**
 
 1. Build Docker image (same for all tenants)
-2. Deploy to Kubernetes cluster (or your platform)
+2. Deploy to Docker Compose (or your platform)
 3. Add replica pods as needed
 4. Database handles multi-tenancy via filtering
 

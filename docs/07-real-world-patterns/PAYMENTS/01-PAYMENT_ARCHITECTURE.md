@@ -1390,7 +1390,6 @@ STRIPE_SECRET_KEY=sk_test_xxx        # Platform Stripe secret key
 STRIPE_WEBHOOK_SECRET=whsec_xxx      # Webhook signing secret
 
 # Optional
-PLATFORM_FEE_PERCENTAGE=0.05         # 5% platform fee (default)
 FRONTEND_URL=http://localhost:3000    # For verification links
 ```
 

@@ -728,10 +728,10 @@ export class HealthController {
 }
 ```
 
-### Kubernetes Probes
+### Container Health Checks
 
 ```yaml
-# Kubernetes deployment health checks
+  # Docker health check configuration
 spec:
   containers:
     - name: api

@@ -128,11 +128,11 @@ Each tenant provisioned with dedicated infrastructure: servers, databases, netwo
 ```
 Infrastructure as Code
 ├── Tenant 1
-│   ├── K8s cluster, PostgreSQL, Redis, S3-like storage
+│   ├── Docker Compose, PostgreSQL, Redis, S3-like storage
 │   ├── Isolated network (VPC)
 │   └── Separate CI/CD pipeline
 ├── Tenant 2
-│   ├── K8s cluster, PostgreSQL, Redis, S3-like storage
+│   ├── Docker Compose, PostgreSQL, Redis, S3-like storage
 │   └── Isolated network (VPC)
 └── ...
 ```

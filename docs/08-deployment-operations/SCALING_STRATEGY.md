@@ -98,7 +98,6 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
 ```
 
-#### Kubernetes (Production Scaling)
 
 ```yaml
 # deployment.yaml
@@ -624,12 +623,6 @@ SELECT pg_reload_conf();
 
 ## Auto-Scaling Policies
 
-### Kubernetes HorizontalPodAutoscaler
-
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
   name: donebyme-api-autoscaler
 spec:
   scaleTargetRef:
@@ -716,7 +709,6 @@ aws autoscaling put-scaling-policy \
 
 ## References
 
-- [Kubernetes Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
 - [AWS Auto Scaling](https://docs.aws.amazon.com/autoscaling/)
 - [PostgreSQL Replication](https://www.postgresql.org/docs/current/warm-standby.html)
 - [Redis Cluster Documentation](https://redis.io/topics/cluster-tutorial)

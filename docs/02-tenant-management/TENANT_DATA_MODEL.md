@@ -44,7 +44,7 @@ The tenant data model organizes multi-tenant data with **explicit tenant_id fiel
 ```sql
 CREATE TABLE tenants (
   -- Primary Key
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id serial PRIMARY KEY,
 
   -- Tenant Identity
   slug VARCHAR(100) NOT NULL UNIQUE,        -- URL-safe identifier
@@ -119,7 +119,7 @@ ORDER BY created_at DESC;
 
 ```sql
 CREATE TABLE tenant_settings (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id serial PRIMARY KEY,
 
   -- Foreign Key to Tenant
   tenant_id UUID NOT NULL,
@@ -182,7 +182,7 @@ CREATE INDEX idx_tenant_settings_tenant_id ON tenant_settings(tenant_id);
 
 ```sql
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id serial PRIMARY KEY,
 
   -- Identity
   email VARCHAR(255) NOT NULL UNIQUE,
@@ -238,7 +238,7 @@ CREATE INDEX idx_users_created_at ON users(created_at);
 
 ```sql
 CREATE TABLE user_tenants (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id serial PRIMARY KEY,
 
   -- Foreign Keys (Many-to-Many)
   user_id UUID NOT NULL,
@@ -314,7 +314,7 @@ WHERE user_id = $1
 
 ```sql
 CREATE TABLE permissions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id serial PRIMARY KEY,
 
   -- Permission Identity
   resource VARCHAR(100) NOT NULL,         -- 'booking', 'user', 'report'

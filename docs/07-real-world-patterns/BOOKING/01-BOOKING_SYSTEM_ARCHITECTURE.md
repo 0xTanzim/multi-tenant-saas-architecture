@@ -462,6 +462,7 @@ Non-Occupied Statuses (Slot is Free):
   declined           - Staff declined the booking
   no_show            - Customer didn't show up
   completed          - Service finished
+  rescheduled        - Original booking replaced by a new booking
 ```
 
 ### 4.3 Complete Booking Lifecycle
@@ -471,31 +472,26 @@ Non-Occupied Statuses (Slot is Free):
                             |
                     [ pending ] (< 1 second)
                             |
-            +---------------+---------------+
-            |                               |
-     Auto-approve?                    Manual-approve?
-            |                               |
+            +---------------+---------------+---------------+
+            |                               |               |
+     Auto-approve?                    Manual-approve?    [ cancelled ]
+            |                               |               FREE
      [ confirmed ]                 [ pending_approval ]
      OCCUPIED                       OCCUPIED
             |                               |
-            |               +-------+-------+
+            +---------------+---------------+---------------+
+            |               |               |               |
+            |        [ confirmed ]    [ declined ]    [ cancelled ]
+            |        OCCUPIED          FREE              FREE
+            |               |
+            +-------+-------+-------+-------+
             |               |               |
-            |        [ confirmed ]    [ declined ]
-            |        OCCUPIED          FREE
-            |               |
-            +-------+-------+
-                    |
-             APPOINTMENT DAY
-                    |
-            +-------+-------+
-            |               |
-     [ in_progress ]  [ no_show ]
-     OCCUPIED          FREE
+     [ in_progress ]  [ no_show ]    [ rescheduled ]
+     OCCUPIED          FREE              FREE
             |
      [ completed ]
      FREE
 ```
-
 ### 4.4 Availability Check Code (Fixed)
 
 ```typescript
@@ -614,24 +610,32 @@ flowchart TD
 
 ### 6.2 Scoring Logic
 
+The system uses a **weighted scoring algorithm** for auto-assignment. The algorithm balances specialization, experience, seniority, and workload across available staff.
+
 ```typescript
 function calculateStaffScore(staff, service, timeSlot) {
   let score = 0;
 
-  // Specialization match (0-30 points)
+  // Specialization match (0-50 points)
+  // Full category match carries the most weight
   if (staff.specializations.includes(service.category)) {
-    score += staff.experienceLevel * 5;
+    score += 50;
   }
 
-  // Customer satisfaction (0-30 points)
-  score += staff.averageRating * 6;
+  // Years of experience (0-30 points)
+  score += Math.min(staff.yearsExperience * 3, 30);
 
-  // Workload balance (0-25 points)
-  const maxDailyBookings = 8;
-  score += (maxDailyBookings - staff.todayBookings) * 3;
+  // Position/Seniority (0-20 points)
+  // Senior/Master = 20, Owner/Lead/Principal = 18,
+  // Mid-level/Specialist = 15, Standard = 10
+  const positionScores = {
+    senior_master: 20, owner_lead_principal: 18,
+    mid_specialist: 15, standard: 10
+  };
+  score += positionScores[staff.position] || 10;
 
-  // Experience level (0-25 points)
-  score += Math.min(staff.yearsExperience * 3, 25);
+  // Workload penalty: -5 per existing same-day booking (max -25)
+  score -= Math.min(staff.todayBookings * 5, 25);
 
   return score;
 }
@@ -640,9 +644,10 @@ function calculateStaffScore(staff, service, timeSlot) {
 ### 6.3 Workload Balancing
 
 Staff selection includes workload penalties to prevent overloading:
-- -5 points per same-day booking (max -25 penalty)
-- Position scoring: Owner/Lead/Principal = 18pts, Senior/Master = 20pts
-- Iterative fallback: if best candidate fails availability validation, try next candidate
+- **-5 points per same-day booking** (max -25 penalty)
+- Position scoring: Senior/Master = 20pts, Owner/Lead/Principal = 18pts, Mid/Specialist = 15pts, Standard = 10pts
+- **Iterative fallback**: If the highest-scored candidate fails a secondary validation check (e.g., stale Redis bitmap), the caller tries the next candidate sequentially
+- A secondary scoring in the availability service also factors in **proficiency level** (beginner→master: 5→20 pts), **primary provider bonus** (+5 pts), and **total historical bookings** (up to +10 pts) for ranking within equal-scored groups
 
 ---
 

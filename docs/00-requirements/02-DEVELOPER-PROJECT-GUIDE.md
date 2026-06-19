@@ -441,7 +441,7 @@ pnpm --filter web dev
 ### 8.2 Production Deployment
 
 - Frontend: Vercel or self-hosted Next.js
-- Backend: AWS ECS or Kubernetes
+- Backend: Docker Compose on EC2
 - Database: AWS RDS PostgreSQL
 - Cache: AWS ElastiCache (Redis)
 - Storage: AWS S3 (images, files)

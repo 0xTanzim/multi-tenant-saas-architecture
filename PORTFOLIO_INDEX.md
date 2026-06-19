@@ -123,6 +123,8 @@ TOTAL: 80+ Production Architecture Documents
 | `BOOKING/01-BOOKING_SYSTEM_ARCHITECTURE.md` | Complete booking lifecycle, states, transitions |
 | `BOOKING/02-BOOKING_LIFECYCLE_FEATURES.md` | Cancellation, rescheduling, confirmation features |
 | `BOOKING/03-INTERVAL_VALIDATION.md` | Availability intervals, buffer times, slot management |
+| `BOOKING/04-CONCURRENCY_ARCHITECTURE.md` | Three-layer concurrency (DB constraint, Redis locks, FOR UPDATE) |
+| `BOOKING/05-NO_SHOW_DETECTION.md` | No-show detection cron, grace period, fee processing |
 
 #### Payments
 | File | Description |
@@ -131,6 +133,7 @@ TOTAL: 80+ Production Architecture Documents
 | `PAYMENTS/02-PLATFORM_FEE_ARCHITECTURE.md` | Fee calculation, split logic, revenue reconciliation |
 | `PAYMENTS/03-PLATFORM_FEE_STORY.md` | Fee distribution workflow with narrative diagrams |
 | `PAYMENTS/04-PAYMENTS_BILLING.md` | Billing cycles, subscription management |
+| `PAYMENTS/05-PLATFORM_FEE_SNAPSHOT.md` | Platform fee snapshotting at booking creation |
 
 #### Loyalty Program
 | File | Description |
@@ -148,6 +151,7 @@ TOTAL: 80+ Production Architecture Documents
 | File | Description |
 |------|-------------|
 | `STAFF/01-COMPLETE_STAFF_WORKFLOW.md` | Staff profiles, employment, availability, calendar |
+| `STAFF/02-EMPLOYMENT_MODEL.md` | 3-layer staff model (profile, employment, competencies) |
 
 #### Search & Discovery
 | File | Description |

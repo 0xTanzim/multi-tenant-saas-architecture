@@ -271,7 +271,7 @@ const token =
   "platformRole": "customer",
   "activeTenant": {
     "id": 5,
-    "role": "member",
+    "role": "staff",
     "permissions": ["booking:create", "booking:read"]
   },
   "aud": "the platform-api-users",
@@ -533,7 +533,7 @@ NEXT_PUBLIC_API_URL=https://api.the platform.com
 
 ### 12.2 Infrastructure Recommendations
 
-- **Load Balancer**: Enable sticky sessions for WebSocket connections
+- **Load Balancer**: Enable sticky sessions for WebSocket (future use) connections
 - **Database**: Connection pooling (min 10, max 50), read replicas for session lookups
 - **Monitoring**: Track `auth.token.refresh.success`, `auth.token.refresh.failure`, `auth.session.active.count`
 - **Alerts**: Refresh failure rate > 5% (5-min window), session creation spike, query latency > 500ms
